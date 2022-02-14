@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class UserProfileManager(BaseUserManager):
     """Manager for user profiles"""
@@ -53,6 +54,56 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """Return string representation of user"""
         return self.email
 
-    def __str__(self):
-        """Return string representation of user"""
-        return self.email
+class Category(models.Model):
+    id =  models.IntegerField(primary_key= True)
+    name = models.CharField(max_length = 100)
+
+class Course(models.Model):
+    id =  models.IntegerField(primary_key= True)
+    category_id = models.ForeignKey(Category,null=True, on_delete = models.SET_NULL)
+    name = models.CharField(max_length = 150)
+    details = models.CharField(max_length =1000)
+    price = models.IntegerField()
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    language = models.CharField(max_length =50)
+
+
+class CourseImage(models.Model):
+     id = models.IntegerField(primary_key= True)
+     image_path = models.TextField()
+     course_id = models.ForeignKey(Course, null=True , on_delete=models.SET_NULL)
+
+
+class CourseVideo(models.Model):
+     id = models.IntegerField(primary_key= True)
+     video_path = models.TextField()
+     course_id = models.ForeignKey(Course, null=True , on_delete=models.SET_NULL)
+     name = models.CharField(max_length=100)
+     description = models.TextField()
+
+
+class Insturctor(models.Model):
+    id = models.IntegerField(primary_key= True)
+    name = models.CharField(max_length=100)
+    image = models.TextField()
+    description = models.TextField()
+
+    rate = models.IntegerField(
+        default=0,
+        validators=[ MaxValueValidator(8),MinValueValidator(1)]
+    )
+
+class CourseInstructor(models.Model):
+    instructor_id = models.ForeignKey(Insturctor, null=True , on_delete=models.SET_NULL)
+    course_id = models.ForeignKey(Course, null=True ,on_delete=models.SET_NULL)
+
+
+class Articles(models.Model):
+    name = models.CharField(max_length=100)
+    text = models.TextField()
+
+
+class Partner(models.Model):
+    name = models.CharField(max_length=150)
+    logo = models.FileField(upload_to="logos", max_length=100)
